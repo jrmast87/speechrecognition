@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import './App.css'
+import { Carousel } from 'react-responsive-carousel'
+import "react-responsive-carousel/lib/styles/carousel.min.css"
+//import {Image, TouchableOpacity} from 'react-native'
 
 const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition
@@ -15,17 +18,14 @@ function App() {
   const [savedNotes, setSavedNotes] = useState([])
   const [vocabMap, setVocabMap] = useState([])
 
-  var passage = 'I like green eggs and ham'
+
+  var greeneggs = 'I like green eggs and ham'
+  
+  var goodnightMoon = 'In the great green room There was a telephone And a red balloon And a picture of The cow jumping over the moon And there were three little bears sitting on chairs And two little kittens And a pair of mittens And a little toy house And a young mouse And a comb and a brush and a bowl full of mush And a quiet old lady who was whispering “hush” Goodnight room Goodnight moon Goodnight cow jumping over the moon Goodnight light And the red balloon Goodnight bears Goodnight chairs Goodnight kittens And goodnight mittens Goodnight clocks And goodnight socks Goodnight little house And goodnight mouse Goodnight comb And goodnight brush Goodnight nobody Goodnight mush And goodnight to the old lady whispering “hush” Goodnight stars Goodnight air Goodnight noises everywhere'
+  var passage = goodnightMoon
   var passageWords = passage.split(" ")
-  var count = Object.keys(passageWords).length
-  console.log(count)
-  for(let i = 1; i <= count; i++) {
-    console.log(passageWords[i]);
-  }
 
-  var vocabWords = []
-  //var vocabMap = vocabWords.map((vocabWord) => vocabWord)
-
+  
   useEffect(() => {
     handleListen()
   }, [isListening])
@@ -61,42 +61,50 @@ function App() {
   }
 
   const handleSaveNote = () => {
+    var vocabWords = passageWords
+    var passageCount = Object.keys(passageWords).length
     setSavedNotes([...savedNotes, note])
-    console.log('saved note ' + note + ' saved')
     var speech = note.split(" ")
     var count = Object.keys(speech).length
-    console.log(count)
     for(let i = 0; i < count; i++) {
-      console.log(speech[i]);
-      console.log(passageWords[i]);
-      console.log(typeof(savedNotes))
-      if(speech[i] === passageWords[i]) {
-        console.log('Match!')
-      } else {
-        //vocabWords.push(passageWords[i])
-        vocabWords.push(passageWords[i])
-        console.log(vocabWords)
+      for(let j = 0; j < passageCount; j++) {
+        if(vocabWords[j] === speech[i]) {
+          console.log(vocabWords[j] + ' and ' + speech[i])
+          vocabWords.splice(j, 1); 
+          console.log('spliced')
+        }
       }
     }
-
+    
     if(vocabWords.length < 1) {
       vocabWords.push('No new Words!')
       console.log(vocabWords)
-    } 
-    setVocabMap(vocabWords)
-    console.log('vocabmap ' + vocabMap)
+      setVocabMap(vocabWords)
+      console.log('vocabmap ' + vocabMap)
+    } else {
+      let noDupWords = [...new Set(vocabWords)]
+      setVocabMap(noDupWords)
+    }
+    
     setNote('')
   }
 
-  
+  const goodnightMoonMethod = () => {
+    passage = goodnightMoon
+  }
+
+  const greenEggsMethod = () => {
+    passage = greeneggs
+  }
 
   return (
     <>
-      <h1>Voice Notes</h1>
+      <h1>Stories</h1>
+      <img src="../goodnight-moon.jpg" alt="placeholder" onClick={goodnightMoonMethod}/>
+      <img src="../greeneggs.jpg" alt="placeholder" onClick={greenEggsMethod}/>
       <div className="container">
         <div className="box">
-          <h2>Read the Passage!</h2>
-          <p>I like green eggs and Ham!</p>
+          <h2>Read the Passage</h2>
           {isListening ? <span>🎙️</span> : <span>🛑🎙️</span>}
           <button onClick={handleSaveNote} disabled={!note}>
             Save Note
@@ -104,6 +112,9 @@ function App() {
           <button onClick={() => setIsListening(prevState => !prevState)}>
             Start/Stop
           </button>
+          <div>
+            <p>{passage}</p>
+          </div>
           <p>{note}</p>
         </div>
         <div className="box">
